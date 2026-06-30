@@ -1,0 +1,42 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Inter, sans-serif;
+}
+
+:root {
+  --navy:     #1A2233;
+  --navy-mid: #2C3E57;
+  --gold:     #C9A84C;
+  --gold-lt:  #E8C96A;
+  --sage:     #7A9E7E;
+  --parch:    #F7F0E6;
+  --ash:      #E8E1D9;
+  --ink:      #2A2A2A;
+  --muted:    #6B6560;
+  --ff-disp:  'Playfair Display', Georgia, serif;
+  --ff-body:  'Inter', system-ui, sans-serif;
+}
+
+
+/* CTA Button */
+.cta-btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+}
+
+.cta-btn.primary {
+  background: white;
+  color: #667eea;
+}
+
+.cta-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
