@@ -15,12 +15,28 @@
           <h1 class="section-title">All Books</h1>
         </div>
         <span class="book-count" v-if="bookStore.books.length > 0">
-          {{ bookStore.books.length }} titles
+          {{ filteredBooks.length }} titles
         </span>
       </div>
 
+      <!-- search + filter row -->
+      <div class="search-filter-row">
+        <SearchBar
+          v-model="searchQuery"
+          placeholder="Search by title or author…"
+          class="product-search"
+        />
+        <select v-model="sortBy" class="filter-select">
+          <option value="">Sort by</option>
+          <option value="price_asc">Price: Low → High</option>
+          <option value="price_desc">Price: High → Low</option>
+          <option value="stock_asc">Stock: Low → High</option>
+          <option value="stock_desc">Stock: High → Low</option>
+        </select>
+      </div>
+
       <!-- loading state -->
-      <div v-if="bookStore.books.length === 0" class="loading-state">
+      <div v-if="bookStore.books.length === 0 && !searchQuery" class="loading-state">
         <div class="loading-book">
           <div class="loading-spine"></div>
           <div class="loading-cover"></div>
@@ -28,10 +44,15 @@
         <p>Fetching your books…</p>
       </div>
 
+      <!-- no results -->
+      <div v-if="bookStore.books.length > 0 && filteredBooks.length === 0" class="no-results">
+        No books found for "{{ searchQuery }}"
+      </div>
+
       <!-- grid -->
       <div v-else class="product-list">
         <div
-          v-for="book in bookStore.books"
+          v-for="book in filteredBooks"
           :key="book.id"
           class="product-card"
         >
@@ -91,15 +112,35 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { useBookStore } from "../stores/book"
 import Product_Sidebar from "../components/layouts/Product_Sidebar.vue"
 import { useCartStore } from '@/stores/cart'
+import SearchBar from '@/components/ui/SearchBar.vue'
 
 const cartStore = useCartStore()
 const bookStore = useBookStore()
 const router = useRouter()
+const searchQuery = ref("")
+const sortBy      = ref("")
+
+const filteredBooks = computed(() => {
+  const q = searchQuery.value.toLowerCase()
+  let list = q
+    ? bookStore.books.filter(b =>
+        b.title.toLowerCase().includes(q) ||
+        b.author.toLowerCase().includes(q)
+      )
+    : [...bookStore.books]
+
+  if (sortBy.value === "price_asc")  list.sort((a, b) => a.price - b.price)
+  if (sortBy.value === "price_desc") list.sort((a, b) => b.price - a.price)
+  if (sortBy.value === "stock_asc")  list.sort((a, b) => a.stock - b.stock)
+  if (sortBy.value === "stock_desc") list.sort((a, b) => b.stock - a.stock)
+
+  return list
+})
 
 onMounted(() => {
   bookStore.fetchBooks()
@@ -131,12 +172,31 @@ function goToDetail(bookId) {
   
 }
 
-/* SECTION HEADER */
+/* PAGE ENTER ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .section-header {
+  opacity: 0;
+  animation: fadeUp 0.55s ease 0.05s forwards;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   margin-bottom: 32px;
+}
+.product-list {
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.25s forwards;
+}
+.loading-state {
+  opacity: 0;
+  animation: fadeUp 0.5s ease 0.15s forwards;
+}
+.no-results {
+  opacity: 0;
+  animation: fadeUp 0.4s ease 0.1s forwards;
 }
 
 .section-eyebrow {
@@ -167,6 +227,36 @@ function goToDetail(bookId) {
   text-transform: uppercase;
   color: #9B9590;
   padding-bottom: 6px;
+}
+
+.search-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeUp 0.55s ease 0.15s forwards;
+}
+.product-search { flex: 1; max-width: 420px; margin-bottom: 0; }
+
+.filter-select {
+  padding: 9px 14px;
+  border: 1.5px solid #E8E1D9;
+  border-radius: 24px;
+  background: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: #1A2233;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  white-space: nowrap;
+}
+.filter-select:focus { border-color: #C9A84C; }
+
+.no-results {
+  text-align: center; padding: 60px 20px; color: #9B9590;
+  font-size: 0.9rem; letter-spacing: 0.03em;
 }
 
 /* LOADING */

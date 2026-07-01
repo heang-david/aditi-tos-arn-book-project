@@ -40,5 +40,22 @@ export const useBookStore = defineStore("bookStore", () => {
       });
   }
 
-  return { books, currentBook, loading, error, fetchBooks, fetchBookById };
+  function createBook(data) {
+    return axios.post("http://127.0.0.1:8000/api/books/", data)
+      .then(response => {
+        books.value.push(response.data)
+        return response.data
+      })
+  }
+
+  function updateBookStock(id, stock) {
+    return axios.patch(`http://127.0.0.1:8000/api/books/${id}`, { stock })
+      .then(response => {
+        const idx = books.value.findIndex(b => b.id === id)
+        if (idx !== -1) books.value[idx] = response.data
+        return response.data
+      })
+  }
+
+  return { books, currentBook, loading, error, fetchBooks, fetchBookById, createBook, updateBookStock };
 });
