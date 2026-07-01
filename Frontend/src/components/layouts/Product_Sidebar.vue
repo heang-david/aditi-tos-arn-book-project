@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="align-self: stretch;">
     <aside class="sidebar">
 
       <!-- header -->
@@ -15,75 +15,44 @@
       <!-- category list -->
       <ul class="category-list">
         <li
-          v-for="category in categories"
-          :key="category.name"
+          v-for="cat in categories"
+          :key="cat"
           class="category-item"
-          :class="{ active: selected === category.name }"
-          @click="selected = category.name"
+          :class="{ active: modelValue === cat }"
+          @click="select(cat)"
         >
-          <span class="cat-icon">{{ category.icon }}</span>
-          <span class="cat-name">{{ category.name }}</span>
+          <span class="cat-name">{{ cat }}</span>
+          <span class="cat-count" v-if="countFor(cat) > 0">{{ countFor(cat) }}</span>
           <svg class="cat-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M2 6h8M6 2.5l3.5 3.5L6 9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </li>
       </ul>
 
-      <!-- divider -->
-      <div class="sidebar-divider">
-        <svg viewBox="0 0 220 30" xmlns="http://www.w3.org/2000/svg">
-          <line x1="0" y1="15" x2="82" y2="15" stroke="#C9A84C" stroke-width="0.7" opacity="0.4"/>
-          <g transform="translate(93, 3)">
-            <path d="M17 4 C13 3 4 5 0 8 L0 18 C4 15 13 13 17 14 C21 13 30 15 34 18 L34 8 C30 5 21 3 17 4Z"
-              fill="none" stroke="#C9A84C" stroke-width="1"/>
-            <line x1="17" y1="4" x2="17" y2="14" stroke="#C9A84C" stroke-width="1"/>
-          </g>
-          <line x1="138" y1="15" x2="220" y2="15" stroke="#C9A84C" stroke-width="0.7" opacity="0.4"/>
-        </svg>
-      </div>
-
-      <!-- stats block -->
-      <div class="sidebar-stats">
-        <div class="stat-row">
-          <span class="stat-label">Total titles</span>
-          <span class="stat-value">40,000+</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">New this week</span>
-          <span class="stat-value">124</span>
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <a href="#" class="sidebar-cta">
-        View all books
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path d="M2 6.5h9M7 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-
     </aside>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { useBookStore } from '@/stores/book'
 
-const selected = ref('Fiction')
+const props = defineProps({ modelValue: { type: String, default: '' } })
+const emit  = defineEmits(['update:modelValue'])
 
-const categories = ref([
-  { name: 'Fiction', },
-  { name: 'Fantasy',          },
-  { name: 'Mystery',          },
-  { name: 'Romance',          },
-  { name: 'Thriller',         },
-  { name: 'History',          },
-  { name: 'Biography',        },
-  { name: 'Programming',        },
-  { name: 'Business',         },
-  { name: 'Poetry',  },
-  { name: 'Travel',           },
-])
+const bookStore = useBookStore()
+
+const categories = [
+  'Fiction', 'Fantasy', 'Mystery', 'Romance', 'Thriller',
+  'History', 'Biography', 'Programming', 'Business', 'Poetry', 'Travel',
+]
+
+function countFor(cat) {
+  return bookStore.books.filter(b => b.genre?.toLowerCase() === cat.toLowerCase()).length
+}
+
+function select(cat) {
+  emit('update:modelValue', props.modelValue === cat ? '' : cat)
+}
 </script>
 
 <style scoped>
@@ -202,58 +171,4 @@ const categories = ref([
 }
 .category-item:hover .cat-arrow { opacity: 1; transform: translateX(2px); }
 
-/* DIVIDER */
-.sidebar-divider {
-  margin: 4px 0 18px;
-  opacity: 0.7;
-}
-
-/* STATS */
-.sidebar-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(247, 240, 230, 0.06);
-  border-radius: 6px;
-  padding: 14px 14px;
-}
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.stat-label {
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: rgba(247, 240, 230, 0.35);
-  letter-spacing: 0.04em;
-}
-.stat-value {
-  font-family: 'Playfair Display', serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #C9A84C;
-  letter-spacing: -0.01em;
-}
-
-/* CTA */
-.sidebar-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-decoration: none;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #1A2233;
-  background: #C9A84C;
-  padding: 11px 16px;
-  border-radius: 5px;
-  transition: background 0.2s, transform 0.15s;
-}
-.sidebar-cta:hover { background: #E8C96A; transform: translateY(-1px); }
 </style>

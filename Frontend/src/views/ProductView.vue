@@ -1,6 +1,6 @@
 <template>
   <div class="product-view">
-    <Product_Sidebar />
+    <Product_Sidebar v-model="selectedCategory" />
 
     <section class="product-section">
 
@@ -12,7 +12,7 @@
             Our collection
             <svg width="28" height="1" viewBox="0 0 28 1"><line x1="0" y1="0.5" x2="28" y2="0.5" stroke="#C9A84C" stroke-width="1"/></svg>
           </div>
-          <h1 class="section-title">All Books</h1>
+          <h1 class="section-title">{{ selectedCategory || 'All Books' }}</h1>
         </div>
         <span class="book-count" v-if="bookStore.books.length > 0">
           {{ filteredBooks.length }} titles
@@ -122,17 +122,19 @@ import SearchBar from '@/components/ui/SearchBar.vue'
 const cartStore = useCartStore()
 const bookStore = useBookStore()
 const router = useRouter()
-const searchQuery = ref("")
-const sortBy      = ref("")
+const searchQuery      = ref("")
+const sortBy           = ref("")
+const selectedCategory = ref("")
 
 const filteredBooks = computed(() => {
-  const q = searchQuery.value.toLowerCase()
-  let list = q
-    ? bookStore.books.filter(b =>
-        b.title.toLowerCase().includes(q) ||
-        b.author.toLowerCase().includes(q)
-      )
-    : [...bookStore.books]
+  const q   = searchQuery.value.toLowerCase()
+  const cat = selectedCategory.value.toLowerCase()
+
+  let list = bookStore.books.filter(b => {
+    const matchesSearch = !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)
+    const matchesCategory = !cat || b.genre?.toLowerCase() === cat
+    return matchesSearch && matchesCategory
+  })
 
   if (sortBy.value === "price_asc")  list.sort((a, b) => a.price - b.price)
   if (sortBy.value === "price_desc") list.sort((a, b) => b.price - a.price)
@@ -184,6 +186,7 @@ function goToDetail(bookId) {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  margin-top: 40px;
   margin-bottom: 32px;
 }
 .product-list {

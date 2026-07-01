@@ -26,7 +26,7 @@
       </p>
 
       <div class="hero-actions">
-        <a href="#featured" class="btn-primary">Browse Featured Books</a>
+        <a href="/products" class="btn-primary">Browse Books</a>
         <a href="#categories" class="btn-ghost">Explore Categories</a>
       </div>
 

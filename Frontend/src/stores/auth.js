@@ -61,5 +61,5 @@ export const useAuthStore = defineStore("auth", () => {
     return { headers: { Authorization: `Bearer ${token.value}` } }
   }
 
-  return { token, username, isAuthenticated, login, logout, authHeaders }
+  return { token, expiresAt, username, isAuthenticated, login, logout, authHeaders }
 })
